@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Deploy to EC2
         run: |
-          ssh -i key.pem ec2-user@<16.171.160.69>
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@<16.171.160.69> <<EOF
           docker pull bahalek/midt:latest
           docker run -d -p 80:80 bahalek/midt:latest
           EOF
