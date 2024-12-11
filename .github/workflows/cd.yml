@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           script: |
-            docker stop flask-app  true
-            docker rm flask-app  true
-            docker pull 220103141/flask-app:latest
-            docker run -d -p 5000:5000 --name flask-app 220103141/flask-app:latest
+            docker stop midt true
+            docker rm midt  true
+            docker pull bahalek/midt:latest
+            docker run -d -p 5000:5000 --name midt bahalek.midt:latest
