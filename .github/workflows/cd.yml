@@ -1,21 +1,33 @@
-name: CD Pipeline
+name: CI/CD Pipeline
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
-
   build:
-
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     steps:
-    - name: Pull Docker image
-      run: sudo docker pull blackazkh/midt-m:latest
-    - name: Delete Old docker container
-      run: sudo docker rm -f cicd-m-container || true
-    - name: Run Docker Container
-      run: sudo docker run -d -p 80:8080 --name cicd-m-container blackazkh/midt-m
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t <docker-username>/<image-name>:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push <docker-username>/<image-name>:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@<EC2-IP> <<EOF
+          docker pull <docker-username>/<image-name>:latest
+          docker run -d -p 80:80 <docker-username>/<image-name>:latest
+          EOF
